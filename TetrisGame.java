@@ -32,11 +32,12 @@ public class TetrisGame extends JPanel implements ActionListener, KeyListener {
     // ゲームの状態管理
     private boolean isGameOver = false;
     private int score = 0;
+    private Timer timer;
 
     // コンストラクタ
     public TetrisGame() {
         // 400ミリ秒ごとに自動で下に落ちるタイマー
-        Timer timer = new Timer(400, this);
+        timer = new Timer(400, this);
         timer.start();
 
         // 最初のブロックを生み出す
@@ -116,6 +117,9 @@ public class TetrisGame extends JPanel implements ActionListener, KeyListener {
                     grid[0][x] = 0;
                 }
                 score += 100; // スコア獲得
+
+                timer.setDelay(400 - (score / 500) * 50); // スコアが上がるごとに落下速度を速くする
+
                 r++; // 行が下にずれたので、同じ行をもう一度判定するためにインデックスを調整
             }
         }
