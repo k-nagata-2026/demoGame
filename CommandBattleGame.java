@@ -29,7 +29,7 @@ public class CommandBattleGame extends JFrame {
     // コンストラクタ（画面の初期設定）
     public CommandBattleGame() {
         // プレイヤーの作成
-        player = new Player("勇者", 150, 15);
+        player = new Player("あなた", 150, 15);
 
         // ウィンドウの基本設定
         setTitle("ターン制コマンドバトルゲーム");
@@ -44,7 +44,8 @@ public class CommandBattleGame extends JFrame {
         // 【左側：プレイヤーパネルの構築】
         JPanel playerPanel = new JPanel(new BorderLayout(0, 5));
         playerStatusLabel = new JLabel("", JLabel.CENTER);
-        playerIconLabel = new JLabel("👦", JLabel.CENTER);
+        playerIconLabel = new JLabel("", JLabel.CENTER);
+        setPlayerIcon("character01.png");
         playerIconLabel.setFont(new Font("SansSerif", Font.PLAIN, 60));
         playerIconLabel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
         playerHPBar = new JProgressBar();
@@ -108,7 +109,7 @@ public class CommandBattleGame extends JFrame {
             defeatedCount++;
 
             if (defeatedCount > 3) {
-                log("\n👑 魔王を倒し、世界に平和が訪れた！ GAME CLEAR!!!");
+                log("\n👑 ボスを倒した！ GAME CLEAR!!!");
                 enemyIconLabel.setText("💀"); // ボス死亡アイコン
                 attackButton.setEnabled(false);
             } else {
@@ -124,7 +125,7 @@ public class CommandBattleGame extends JFrame {
         updateStatus();
 
         if (!player.isAlive()) {
-            log("\n💀 勇者は力尽きてしまった… GAME OVER");
+            log("\n💀 あなたは力尽きてしまった… GAME OVER");
             playerIconLabel.setText("👻"); // プレイヤー死亡アイコン
             attackButton.setEnabled(false);
         }
@@ -133,14 +134,14 @@ public class CommandBattleGame extends JFrame {
     // 👾 次の敵を生成して、ステータスやアイコンを切り替えるメソッド
     private void spawnNextEnemy() {
         if (defeatedCount == 3) {
-            enemy = new Enemy("魔王", 200, 25);
-            enemyIconLabel.setText("😈"); // 🌟 3匹倒したらボスのアイコン（悪魔）に切り替え！
-            log("\n👿 辺りの空気が変わった… ボス「魔王」が現れた！！！");
+            enemy = new Enemy("ボス", 200, 25);
+            setEnemyIcon("character03.png"); // 🌟 3匹倒したらボスのアイコン（悪魔）に切り替え！
+            log("\nボスが現れた！！！");
         } else {
             int enemyNum = defeatedCount + 1;
-            enemy = new Enemy("モンスター" + enemyNum, 40, 10);
-            enemyIconLabel.setText("👾"); // 🌟 雑魚敵のアイコンにリセット
-            log("\n👾 「モンスター" + enemyNum + "」が飛び出してきた！");
+            enemy = new Enemy("敵" + enemyNum, 40, 10);
+            setEnemyIcon("character02.png"); // 🌟 雑魚敵のアイコンにリセット
+            log("\n👾 「敵" + enemyNum + "」が飛び出してきた！");
         }
 
         enemyHPBar.setMaximum(enemy.getHp());
@@ -162,100 +163,25 @@ public class CommandBattleGame extends JFrame {
         logArea.append(msg + "\n");
         logArea.setCaretPosition(logArea.getDocument().getLength());
     }
-}
 
-// =====================================================================
-// 👤 プレイヤーのクラス
-// =====================================================================
-class Player {
-    private String name;
-    private int hp;
-    private int atk;
+    // 🌟 プレイヤーの画像をセットするメソッド
+    private void setPlayerIcon(String fileName) {
+        ImageIcon icon = new ImageIcon(fileName);
+        // 画像を60x60ピクセルに滑らかに縮小リサイズする処理
+        Image img = icon.getImage();
+        Image resizedImg = img.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
 
-    public Player(String name, int hp, int atk) {
-        this.name = name;
-        this.hp = hp;
-        this.atk = atk;
+        playerIconLabel.setIcon(new ImageIcon(resizedImg));
+        playerIconLabel.setText(""); // 元の絵文字を消す
     }
 
-    public String attack(Enemy enemy) {
-        double r = Math.random();
-        if (r < 0.1) {
-            return "👉 しかし 攻撃は外れてしまった！";
-        } else if (r > 0.9) {
-            int damage = this.atk * 3;
-            enemy.receiveDamage(damage);
-            return "🔥 会心の一撃！！！\n💥 " + enemy.getName() + " に " + damage + " の大ダメージ！";
-        } else {
-            int damage = this.atk;
-            enemy.receiveDamage(damage);
-            return "💥 " + enemy.getName() + " に " + damage + " のダメージ！";
-        }
-    }
+    // 🌟 敵の画像をセットするメソッド
+    private void setEnemyIcon(String fileName) {
+        ImageIcon icon = new ImageIcon(fileName);
+        Image img = icon.getImage();
+        Image resizedImg = img.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
 
-    public void receiveDamage(int damage) {
-        this.hp -= damage;
-        if (this.hp < 0)
-            this.hp = 0;
-    }
-
-    public boolean isAlive() {
-        return this.hp > 0;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getHp() {
-        return hp;
-    }
-}
-
-// =====================================================================
-// 👾 敵のクラス
-// =====================================================================
-class Enemy {
-    private String name;
-    private int hp;
-    private int atk;
-
-    public Enemy(String name, int hp, int atk) {
-        this.name = name;
-        this.hp = hp;
-        this.atk = atk;
-    }
-
-    public String attack(Player player) {
-        double r = Math.random();
-        if (r < 0.1) {
-            return "👉 しかし 敵の攻撃は外れた！";
-        } else if (r > 0.9) {
-            int damage = this.atk * 3;
-            player.receiveDamage(damage);
-            return "😭 痛恨の一撃！！！\n💥 " + player.getName() + " は " + damage + " のダメージを受けた！";
-        } else {
-            int damage = this.atk;
-            player.receiveDamage(damage);
-            return "💥 " + player.getName() + " は " + damage + " のダメージを受けた！";
-        }
-    }
-
-    public void receiveDamage(int damage) {
-        this.hp -= damage;
-        if (this.hp < 0)
-            this.hp = 0;
-    }
-
-    public boolean isAlive() {
-        return this.hp > 0;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getHp() {
-        return hp;
+        enemyIconLabel.setIcon(new ImageIcon(resizedImg));
+        enemyIconLabel.setText(""); // 元の絵文字を消す
     }
 }
